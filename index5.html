@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyGenie AI - Learn Smarter</title>
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #2d3436;
+            --accent: #6c5ce7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--glass-bg);
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--accent);
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            color: #636e72;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: #f9f9fb;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            padding: 12px 25px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+            filter: brightness(1.1);
+        }
+
+        #outputArea, #doubtArea {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: none; /* Hidden until generated */
+        }
+
+        .download-btn {
+            background: #00b894;
+            margin-top: 15px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 30px 0;
+        }
+
+        .answer-box {
+            color: #2d3436;
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>StudyGenie AI</h1>
+            <p>"Learn smarter, not harder"</p>
+        </header>
+
+        <div class="section">
+            <h3>Generate Study Notes</h3>
+            <input type="text" id="topicInput" placeholder="Enter topic (e.g. Photosynthesis, Gravity)">
+            <br>
+            <button onclick="generateContent()">Generate Notes</button>
+            
+            <div id="outputArea">
+                <div id="contentResult"></div>
+                <button class="download-btn" onclick="downloadNotes()">Download Notes (.txt)</button>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="section">
+            <h3>Ask a Doubt</h3>
+            <input type="text" id="doubtInput" placeholder="Ask your question here...">
+            <br>
+            <button onclick="askDoubt()">Get Answer</button>
+            
+            <div id="doubtArea" class="answer-box">
+                <strong>Genie's Answer:</strong>
+                <p id="answerText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+
+        // Mock Database for Offline functionality
+        const studyData = {
+            "photosynthesis": {
+                summary: "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with the help of chlorophyll.",
+                points: ["Occurs in chloroplasts", "Requires CO2, Water, and Sunlight", "Produces Glucose and Oxygen"],
+                quiz: "1. What pigment absorbs light? \n2. What gas is released as a byproduct?"
+            },
+            "gravity": {
+                summary: "Gravity is a fundamental force that attracts two bodies toward each other. On Earth, it gives weight to physical objects.",
+                points: ["Discovered/Formalized by Isaac Newton", "Governed by the Inverse Square Law", "9.8 m/s² is Earth's average gravitational acceleration"],
+                quiz: "1. Who formulated the law of universal gravitation? \n2. Does gravity increase or decrease with distance?"
+            },
+            "default": {
+                summary: "General Study Mode: Keep focusing on the core concepts and active recall.",
+                points: ["Break topics into small chunks", "Use Feynman technique", "Review periodically"],
+                quiz: "1. Can you explain this to a 5-year old? \n2. What is the most confusing part of this topic?"
+            }
+        };
+
+        const doubtResponses = [
+            "That's a great question! Think of it like a puzzle where every piece connects to the core concept.",
+            "According to the principles of this subject, that happens because of the interaction between the variables involved.",
+            "Great observation! Most students find that part tricky, but it's essential for understanding the big picture.",
+            "Essentially, you are looking at the cause-and-effect relationship here."
+        ];
+
+        function generateContent() {
+            const topic = document.getElementById('topicInput').value.toLowerCase().trim();
+            const outputArea = document.getElementById('outputArea');
+            const contentResult = document.getElementById('contentResult');
+            
+            if(!topic) { alert("Please enter a topic!"); return; }
+
+            const data = studyData[topic] || studyData['default'];
+
+            contentResult.innerHTML = `
+                <h4>Summary</h4> <p>${data.summary}</p>
+                <h4>Key Points</h4> <ul>${data.points.map(p => `<li>${p}</li>`).join('')}</ul>
+                <h4>Quick Quiz</h4> <p style="white-space: pre-line">${data.quiz}</p>
+            `;
+
+            outputArea.style.display = "block";
+        }
+
+        function askDoubt() {
+            const doubt = document.getElementById('doubtInput').value;
+            const doubtArea = document.getElementById('doubtArea');
+            const answerText = document.getElementById('answerText');
+
+            if(!doubt) { alert("Please ask a question!"); return; }
+
+            // Randomly select a response to simulate "thinking"
+            const randomReply = doubtResponses[Math.floor(Math.random() * doubtResponses.length)];
+            
+            answerText.innerText = randomReply;
+            doubtArea.style.display = "block";
+        }
+
+        function downloadNotes() {
+            const content = document.getElementById('contentResult').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'StudyNotes.txt';
+            a.click();
+        }
+    </script>
+</body>
+</html>
